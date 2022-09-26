@@ -1,20 +1,24 @@
 import { renderBlock } from './lib.js';
-const oneDayInMilliseconds: number = 24*3600*1000;
-const standartDayDelayNumber = 2;
-// standartMonthDelayNumber может быть числом от 1 до 12, где 2 означает прибавление 1 месяца
-const standartMonthDelayNumber = 2;
-// по умолчанию дата выезда через 2 дня
-const currentDate: Date = new Date();
-const standartCheckInDate = currentDate.toLocaleDateString('en-CA');
-const standartCheckOutDate = new Date(currentDate.getTime() + standartDayDelayNumber * oneDayInMilliseconds);
-const earliestCheckInDate = currentDate.toLocaleDateString('en-CA');
 
-currentDate.setMonth(currentDate.getMonth() + standartMonthDelayNumber);
-currentDate.setDate(0);
-const latestChecOutDate = currentDate.toLocaleDateString('en-AC');
 
 
 export function renderSearchFormBlock () {
+  const oneDayInMilliseconds = 86400000;
+  const standartDayDelayNumber = 2;
+  // standartMonthDelayNumber может быть числом от 1 до 12, где 2 означает прибавление 1 месяца
+
+  const standartMonthDelayNumber = 2;
+  // по умолчанию дата выезда через 2 дня
+
+  const date: Date = new Date();
+  const standartCheckInDate = date.toLocaleDateString('en-CA');
+  const standartCheckOutDate = new Date(date.getTime() + standartDayDelayNumber * oneDayInMilliseconds).toLocaleDateString('en-CA');
+  const earliestCheckInDate = date.toLocaleDateString('en-CA');
+
+  date.setMonth(date.getMonth() + standartMonthDelayNumber);
+  date.setDate(0);
+  const latestCheckOutDate = date.toLocaleDateString('en-CA');
+  
   renderBlock(
     'search-form-block',
     `
@@ -34,11 +38,11 @@ export function renderSearchFormBlock () {
         <div class="row">
           <div>
             <label for="check-in-date">Дата заезда</label>
-            <input id="check-in-date" type="date" value="${standartCheckInDate}" min="${earliestCheckInDate}" max="${latestChecOutDate}" name="checkin" />
+            <input id="check-in-date" type="date" value="${standartCheckInDate}" min="${earliestCheckInDate}" max="${latestCheckOutDate}" name="checkin" />
           </div>
           <div>
             <label for="check-out-date">Дата выезда</label>
-            <input id="check-out-date" type="date" value="${standartCheckOutDate}" min="${earliestCheckInDate}" max="${latestChecOutDate}" name="checkout" />
+            <input id="check-out-date" type="date" value="${standartCheckOutDate}" min="${earliestCheckInDate}" max="${latestCheckOutDate}" name="checkout" />
           </div>
           <div>
             <label for="max-price">Макс. цена суток</label>
