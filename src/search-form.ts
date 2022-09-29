@@ -1,6 +1,24 @@
-import { renderBlock } from './lib.js'
+import { renderBlock } from './lib.js';
+
+
 
 export function renderSearchFormBlock () {
+  const oneDayInMilliseconds = 86400000;
+  const standartDayDelayNumber = 2;
+  // standartMonthDelayNumber может быть числом от 1 до 12, где 2 означает прибавление 1 месяца
+
+  const standartMonthDelayNumber = 2;
+  // по умолчанию дата выезда через 2 дня
+
+  const date: Date = new Date();
+  const standartCheckInDate = date.toLocaleDateString('en-CA');
+  const standartCheckOutDate = new Date(date.getTime() + standartDayDelayNumber * oneDayInMilliseconds).toLocaleDateString('en-CA');
+  const earliestCheckInDate = date.toLocaleDateString('en-CA');
+
+  date.setMonth(date.getMonth() + standartMonthDelayNumber);
+  date.setDate(0);
+  const latestCheckOutDate = date.toLocaleDateString('en-CA');
+  
   renderBlock(
     'search-form-block',
     `
@@ -20,11 +38,11 @@ export function renderSearchFormBlock () {
         <div class="row">
           <div>
             <label for="check-in-date">Дата заезда</label>
-            <input id="check-in-date" type="date" value="2021-05-11" min="2021-05-11" max="2021-06-30" name="checkin" />
+            <input id="check-in-date" type="date" value="${standartCheckInDate}" min="${earliestCheckInDate}" max="${latestCheckOutDate}" name="checkin" />
           </div>
           <div>
             <label for="check-out-date">Дата выезда</label>
-            <input id="check-out-date" type="date" value="2021-05-13" min="2021-05-11" max="2021-06-30" name="checkout" />
+            <input id="check-out-date" type="date" value="${standartCheckOutDate}" min="${earliestCheckInDate}" max="${latestCheckOutDate}" name="checkout" />
           </div>
           <div>
             <label for="max-price">Макс. цена суток</label>
