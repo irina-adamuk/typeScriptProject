@@ -1,6 +1,6 @@
 import { renderBlock } from './lib.js';
-
-
+// import { IPlace, ISearchCallBack } from './interfaces.js';
+import { ISearchFormData } from './interfaces.js';
 
 export function renderSearchFormBlock () {
   const oneDayInMilliseconds = 86400000;
@@ -22,7 +22,7 @@ export function renderSearchFormBlock () {
   renderBlock(
     'search-form-block',
     `
-    <form>
+    <form id="search-form">
       <fieldset class="search-filedset">
         <div class="row">
           <div>
@@ -56,4 +56,41 @@ export function renderSearchFormBlock () {
     </form>
     `
   )
+
+  const searchForm = document.getElementById('search-form');
+  searchForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const cityInput = searchForm.querySelector('#city') as HTMLInputElement;
+    const checkInInput = searchForm.querySelector('#check-in-date') as HTMLInputElement;
+    const checkOutInput = searchForm.querySelector('#check-out-date') as HTMLInputElement;
+    const maxPriceInput = searchForm.querySelector('#max-price') as HTMLInputElement;
+
+    const searchFormData: ISearchFormData = {
+      city: cityInput.value,
+      checkInDate: new Date(checkInInput.value),
+      checkOutDate: new Date(checkOutInput.value),
+      maxPrice: maxPriceInput.value === '' ? null : +maxPriceInput.value,
+    }
+    search(searchFormData);
+  })
 }
+
+// const searchCallBack: ISearchCallBack = (error, places) => {
+//   console.log('searchCallBack', error, places);
+// }
+export function search( data: ISearchFormData) {
+  console.log('function search searchFormData = ', data);
+}
+
+// export function search( data: ISearchFormData, searchCallBack: ISearchCallBack) {
+//   console.log('function search searchFormData = ', data);
+
+//   const answer = Boolean(Math.random() < 0.5);
+//   if (answer) {
+//     searchCallBack(Error('error'));
+//   } else {
+//     const places = IPlace[] = [];
+//     searchCallBack(places);
+//   }
+// }
+
