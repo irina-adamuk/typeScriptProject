@@ -9,9 +9,6 @@ export interface ISearchFormData {
   checkOutDate: Date;
   maxPrice: number | null;
 }
-// export interface IPlace {}
 
-// export interface ISearchCallBack {
-//   (error?: Error, places?: IPlace[]): void
-// }
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IPlace {}

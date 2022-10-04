@@ -1,6 +1,6 @@
 import { renderBlock } from './lib.js';
-// import { IPlace, ISearchCallBack } from './interfaces.js';
-import { ISearchFormData } from './interfaces.js';
+
+import { ISearchFormData, IPlace } from './interfaces.js';
 
 export function renderSearchFormBlock () {
   const oneDayInMilliseconds = 86400000;
@@ -71,26 +71,35 @@ export function renderSearchFormBlock () {
       checkOutDate: new Date(checkOutInput.value),
       maxPrice: maxPriceInput.value === '' ? null : +maxPriceInput.value,
     }
-    search(searchFormData);
+    search(searchFormData, searchCallBack);
   })
 }
-
-// const searchCallBack: ISearchCallBack = (error, places) => {
-//   console.log('searchCallBack', error, places);
-// }
-export function search( data: ISearchFormData) {
-  console.log('function search searchFormData = ', data);
+interface ISearchCallBack {
+  (data: DataI): void
+}
+type DataI = {
+  data:IPlace | null,
+  error: Error | null
 }
 
-// export function search( data: ISearchFormData, searchCallBack: ISearchCallBack) {
-//   console.log('function search searchFormData = ', data);
+const searchCallBack: ISearchCallBack = (data: DataI) => {
+  if(data.error) {
+    console.error(data.error);
+  } else{
+    console.log('searchCallBack', data.data);
+  }
+  
+}
 
-//   const answer = Boolean(Math.random() < 0.5);
-//   if (answer) {
-//     searchCallBack(Error('error'));
-//   } else {
-//     const places = IPlace[] = [];
-//     searchCallBack(places);
-//   }
-// }
+export function search( data: ISearchFormData, searchCallBack: ISearchCallBack) {
+  console.log('function search searchFormData = ', data);
+
+  const answer = Boolean(Math.random() < 0.5);
+  if (answer) {
+    searchCallBack({error: new Error('error'), data: []});
+  } else {
+    const places: IPlace[] = [];
+    searchCallBack({error: null, data: places});
+  }
+}
 
