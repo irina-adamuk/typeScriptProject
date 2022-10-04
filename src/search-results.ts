@@ -86,3 +86,4 @@ export function renderSearchResultsBlock () {
     `
   )
 }
+// домашнее задание появится сдесь позже
