@@ -1,9 +1,17 @@
 export function renderBlock (elementId, html) {
   const element = document.getElementById(elementId)
-  element.innerHTML = html
+  element.innerHTML = html;
+}
+type MessageType = {
+  text: string;
+  type: string;
+}
+type ActionType = {
+  name: string;
+  handler: () => void;
 }
 
-export function renderToast (message, action) {
+export function renderToast (message: MessageType, action: ActionType) {
   let messageText = ''
   
   if (message != null) {

@@ -4,7 +4,7 @@ import { renderUserBlock } from './user.js';
 import { renderToast } from './lib.js';
 
 window.addEventListener('DOMContentLoaded', () => {
-  renderUserBlock('', '', 0);
+  renderUserBlock('', 'https://www.fillmurray.com/250/250', 0);
   renderSearchFormBlock();
   renderSearchStubBlock();
   renderToast(
