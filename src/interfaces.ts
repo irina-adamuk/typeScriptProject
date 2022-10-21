@@ -7,8 +7,16 @@ export interface ISearchFormData {
   city: string;
   checkInDate: Date;
   checkOutDate: Date;
-  maxPrice: number | null;
+  priceLimit: number | null;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IPlace {}
+export interface IPlace {
+  id?: string;
+  title?: string;
+  details?: string;
+  photos?: string[];
+  coordinates?: number[];
+  bookedDates?: [];
+  totalPrice?: number
+}

@@ -1,6 +1,7 @@
 import { renderBlock } from './lib.js';
-
+import { renderSearchResultsBlock } from './search-results.js';
 import { ISearchFormData, IPlace } from './interfaces.js';
+import { FlatRentSdk } from './flat-rent-sdk.js';
 
 export function renderSearchFormBlock () {
   const oneDayInMilliseconds = 86400000;
@@ -69,7 +70,7 @@ export function renderSearchFormBlock () {
       city: cityInput.value,
       checkInDate: new Date(checkInInput.value),
       checkOutDate: new Date(checkOutInput.value),
-      maxPrice: maxPriceInput.value === '' ? null : +maxPriceInput.value,
+      priceLimit: maxPriceInput.value === '' ? null : +maxPriceInput.value,
     }
     search(searchFormData, searchCallBack);
   })
@@ -78,7 +79,7 @@ interface ISearchCallBack {
   (data: DataI): void
 }
 type DataI = {
-  data:IPlace | null,
+  data:IPlace[] | null,
   error: Error | null
 }
 
@@ -87,18 +88,19 @@ const searchCallBack: ISearchCallBack = (data: DataI) => {
     console.error(data.error);
   } else{
     console.log('searchCallBack', data.data);
+    renderSearchResultsBlock(data.data);
   }
-  
 }
 
-export function search( data: ISearchFormData, searchCallBack: ISearchCallBack) {
+export async function search( data: ISearchFormData, searchCallBack: ISearchCallBack) {
   console.log('function search searchFormData = ', data);
-
-  const answer = Boolean(Math.random() < 0.5);
-  if (answer) {
+  const rentSDK = new FlatRentSdk();
+  const answer: any = await rentSDK.search(data);  
+  if (!answer) {
     searchCallBack({error: new Error('error'), data: []});
   } else {
-    const places: IPlace[] = [];
-    searchCallBack({error: null, data: places});
+    searchCallBack({error: null, data: answer});
   }
 }
+
+
