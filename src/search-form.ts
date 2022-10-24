@@ -1,7 +1,7 @@
 import { renderBlock } from './lib.js';
 import { renderSearchResultsBlock } from './search-results.js';
 import { ISearchFormData, IPlace } from './interfaces.js';
-import { FlatRentSdk } from './flat-rent-sdk.js';
+// import { FlatRentSdk } from './flat-rent-sdk.js';
 
 export function renderSearchFormBlock () {
   const oneDayInMilliseconds = 86400000;
@@ -72,7 +72,7 @@ export function renderSearchFormBlock () {
       checkOutDate: new Date(checkOutInput.value),
       priceLimit: maxPriceInput.value === '' ? null : +maxPriceInput.value,
     }
-    search(searchFormData, searchCallBack);
+    searchFromAPI(searchFormData, searchCallBack);
   })
 }
 interface ISearchCallBack {
@@ -92,15 +92,66 @@ const searchCallBack: ISearchCallBack = (data: DataI) => {
   }
 }
 
-export async function search( data: ISearchFormData, searchCallBack: ISearchCallBack) {
+
+function dateToUnixStamp(date) {
+  return date.getTime() / 1000
+}
+
+function responseToJson(requestPromise) {
+  return requestPromise
+    .then((response) => {
+      return response.text()
+    })
+    .then((response) => {
+      return JSON.parse(response)
+    })
+}
+
+function search(checkInDate, checkOutDate, maxPrice) {
+  let url = 'http://localhost:3030/places?' +
+  `checkInDate=${dateToUnixStamp(checkInDate)}&` +
+  `checkOutDate=${dateToUnixStamp(checkOutDate)}&` +
+  'coordinates=59.9386,30.3141'
+
+  if (maxPrice != null) {
+    url += `&maxPrice=${maxPrice}`
+  }
+
+  return responseToJson(fetch(url))
+}
+
+export async function searchFromAPI( data: ISearchFormData, searchCallBack: ISearchCallBack) {
   console.log('function search searchFormData = ', data);
-  const rentSDK = new FlatRentSdk();
-  const answer: any = await rentSDK.search(data);  
+
+  let url = 'http://localhost:3030/places?' +
+  `checkInDate=${dateToUnixStamp(data.checkInDate)}&` +
+  `checkOutDate=${dateToUnixStamp(data.checkOutDate)}&` +
+  'coordinates=59.9386,30.3141'
+
+  if (data.priceLimit != null) {
+    url += `&maxPrice=${data.priceLimit}`
+  }
+
+  const answer = await responseToJson(fetch(url))
+
   if (!answer) {
     searchCallBack({error: new Error('error'), data: []});
   } else {
     searchCallBack({error: null, data: answer});
   }
 }
+
+// export async function search( data: ISearchFormData, searchCallBack: ISearchCallBack) {
+//   console.log('function search searchFormData = ', data);
+
+//   const rentSDK = new FlatRentSdk();
+//   const answer: any = await rentSDK.search(data);  
+
+//   if (!answer) {
+//     searchCallBack({error: new Error('error'), data: []});
+//   } else {
+//     searchCallBack({error: null, data: answer});
+//   }
+// }
 
 

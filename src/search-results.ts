@@ -59,15 +59,15 @@ export function renderSearchResultsBlock (data: IPlace[]) {
     <div class="result-container">
       <div class="result-img-container">
         <div class="favorites ${activeClass} js-favoriteToggle" data-id="${item.id}"></div>
-        <img class="result-img" src="${item.photos[0]}" alt="">
+        <img class="result-img" src="${item.image}" alt="">
       </div>	
       <div class="result-info">
         <div class="result-info--header">
-          <p>${item.title}</p>
-          <p class="price">${item.totalPrice}&#8381;</p>
+          <p>${item.name}</p>
+          <p class="price">${item.price}&#8381;</p>
         </div>
-        <div class="result-info--map"><i class="map-icon"></i> 2.5км от вас</div>
-        <div class="result-info--descr">${item.details}</div>
+        <div class="result-info--map"><i class="map-icon"></i> ${item.remoteness}км от вас</div>
+        <div class="result-info--descr">${item.description}</div>
         <div class="result-info--footer">
           <div>
             <button>Забронировать</button>
