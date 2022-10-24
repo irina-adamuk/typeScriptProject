@@ -1,7 +1,7 @@
 import { renderBlock } from './lib.js';
 import { renderSearchResultsBlock } from './search-results.js';
-import { ISearchFormData, IPlace } from './interfaces.js';
-// import { FlatRentSdk } from './flat-rent-sdk.js';
+import { ISearchFormData, IPlaceCommon, IPlaceAPI } from './interfaces.js';
+import { FlatRentSdk, IPlaceSDK } from './flat-rent-sdk.js';
 
 export function renderSearchFormBlock () {
   const oneDayInMilliseconds = 86400000;
@@ -31,10 +31,10 @@ export function renderSearchFormBlock () {
             <input id="city" type="text" disabled value="Санкт-Петербург" />
             <input type="hidden" disabled value="59.9386,30.3141" />
           </div>
-          <!--<div class="providers">
-            <label><input type="checkbox" name="provider" value="homy" checked /> Homy</label>
-            <label><input type="checkbox" name="provider" value="flat-rent" checked /> FlatRent</label>
-          </div>--!>
+          <div class="providers">
+            <label><input id="homy" type="checkbox" name="provider" value="homy" /> Homy</label>
+            <label><input id="flat-rent" type="checkbox" name="provider" value="flat-rent" /> FlatRent</label>
+          </div>
         </div>
         <div class="row">
           <div>
@@ -59,27 +59,49 @@ export function renderSearchFormBlock () {
   )
 
   const searchForm = document.getElementById('search-form');
-  searchForm.addEventListener('submit', (event) => {
+  
+  searchForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const cityInput = searchForm.querySelector('#city') as HTMLInputElement;
     const checkInInput = searchForm.querySelector('#check-in-date') as HTMLInputElement;
     const checkOutInput = searchForm.querySelector('#check-out-date') as HTMLInputElement;
     const maxPriceInput = searchForm.querySelector('#max-price') as HTMLInputElement;
+    const apiCheckbox = searchForm.querySelector('#homy') as HTMLInputElement;
+    const sdkCheckbox= searchForm.querySelector('#flat-rent') as HTMLInputElement;
 
     const searchFormData: ISearchFormData = {
       city: cityInput.value,
       checkInDate: new Date(checkInInput.value),
       checkOutDate: new Date(checkOutInput.value),
       priceLimit: maxPriceInput.value === '' ? null : +maxPriceInput.value,
+      isCheckedAPI: apiCheckbox.checked,
+      isCheckedSDK: sdkCheckbox.checked
     }
-    searchFromAPI(searchFormData, searchCallBack);
+
+    console.log(searchFormData)
+
+    let answer:IPlaceCommon[] = [];
+    if(apiCheckbox.checked) {
+      const dataAPI = searchFromAPI(searchFormData);
+      answer = answer.concat(await dataAPI);
+    }
+    if(sdkCheckbox.checked) {
+      const dataSDK = searchFromSDK(searchFormData);
+      answer = answer.concat(await dataSDK);
+    }
+    
+    if (!answer) {
+      searchCallBack({error: new Error('error'), data: []});
+    } else {
+      searchCallBack({error: null, data: answer});
+    }
   })
 }
 interface ISearchCallBack {
   (data: DataI): void
 }
 type DataI = {
-  data:IPlace[] | null,
+  data:IPlaceCommon[] | null,
   error: Error | null
 }
 
@@ -107,7 +129,7 @@ function responseToJson(requestPromise) {
     })
 }
 
-export async function searchFromAPI( data: ISearchFormData, searchCallBack: ISearchCallBack) {
+export async function searchFromAPI( data: ISearchFormData):Promise<IPlaceCommon[]> {
   console.log('function search searchFormData = ', data);
 
   let url = 'http://localhost:3030/places?' +
@@ -119,26 +141,41 @@ export async function searchFromAPI( data: ISearchFormData, searchCallBack: ISea
     url += `&maxPrice=${data.priceLimit}`
   }
 
-  const answer = await responseToJson(fetch(url))
+  const dataAPI:IPlaceAPI[] = await responseToJson(fetch(url))
+  
+  const IPlaceCommonData:IPlaceCommon[] = dataAPI.map((item) => {
+    return {
+      id: item.id.toString(),
+      name: item.name,
+      description: item.description,
+      image: [ item.image ],
+      bookedDates: item.bookedDates,
+      price: item.price,
+      remoteness: item.remoteness,
+    }
+  })
 
-  if (!answer) {
-    searchCallBack({error: new Error('error'), data: []});
-  } else {
-    searchCallBack({error: null, data: answer});
-  }
+  return IPlaceCommonData;
+}
+export async function searchFromSDK( data: ISearchFormData):Promise<IPlaceCommon[]> {
+  const rentSDK = new FlatRentSdk();
+  const dataSDK: IPlaceSDK[] = await rentSDK.search(data);
+  console.log(dataSDK);
+  
+  const IPlaceCommonData:IPlaceCommon[] = dataSDK.map((item) => {
+    return {
+      id: item.id,
+      name: item.title,
+      description: item.details,
+      image: item.photos,
+      bookedDates: item.bookedDates,
+      price: item.totalPrice,
+      remoteness: null,
+    }
+  })
+
+  return IPlaceCommonData;
 }
 
-// export async function search( data: ISearchFormData, searchCallBack: ISearchCallBack) {
-//   console.log('function search searchFormData = ', data);
-
-//   const rentSDK = new FlatRentSdk();
-//   const answer: any = await rentSDK.search(data);  
-
-//   if (!answer) {
-//     searchCallBack({error: new Error('error'), data: []});
-//   } else {
-//     searchCallBack({error: null, data: answer});
-//   }
-// }
 
 

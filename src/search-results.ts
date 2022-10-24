@@ -1,6 +1,6 @@
 import { renderBlock } from './lib.js';
 import { APILocalStorage } from './APILocalStorage.js';
-import { IPlace } from './interfaces.js';
+import { IPlaceCommon } from './interfaces.js';
 
 export function renderSearchStubBlock () {
   renderBlock(
@@ -48,25 +48,26 @@ export function getFavoritesList():string[] {
 
 
 
-export function renderSearchResultsBlock (data: IPlace[]) {
+export function renderSearchResultsBlock (data: IPlaceCommon[]) {
   let list = '';
   const favIds:string[] = getFavoritesList();
   data.forEach((item) => {
     const isFavorite = favIds.find((favId) => { return favId === (item.id).toString();});
     const activeClass = isFavorite === undefined ? '' : 'active';
+    const remoteness = item.remoteness === null ? '' : `<div class="result-info--map"><i class="map-icon"></i> ${item.remoteness} км от вас</div>`
     const template =
     `<li class="result">
     <div class="result-container">
       <div class="result-img-container">
         <div class="favorites ${activeClass} js-favoriteToggle" data-id="${item.id}"></div>
-        <img class="result-img" src="${item.image}" alt="">
+        <img class="result-img" src="${item.image[0]}" alt="">
       </div>	
       <div class="result-info">
         <div class="result-info--header">
           <p>${item.name}</p>
           <p class="price">${item.price}&#8381;</p>
         </div>
-        <div class="result-info--map"><i class="map-icon"></i> ${item.remoteness} км от вас</div>
+        ${remoteness}
         <div class="result-info--descr">${item.description}</div>
         <div class="result-info--footer">
           <div>
