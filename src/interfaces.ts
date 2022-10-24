@@ -12,7 +12,7 @@ export interface ISearchFormData {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IPlace {
-  id?: string;
+  id: number;
   // title?: string;
   name: string;
   description?: string;

@@ -107,19 +107,6 @@ function responseToJson(requestPromise) {
     })
 }
 
-function search(checkInDate, checkOutDate, maxPrice) {
-  let url = 'http://localhost:3030/places?' +
-  `checkInDate=${dateToUnixStamp(checkInDate)}&` +
-  `checkOutDate=${dateToUnixStamp(checkOutDate)}&` +
-  'coordinates=59.9386,30.3141'
-
-  if (maxPrice != null) {
-    url += `&maxPrice=${maxPrice}`
-  }
-
-  return responseToJson(fetch(url))
-}
-
 export async function searchFromAPI( data: ISearchFormData, searchCallBack: ISearchCallBack) {
   console.log('function search searchFormData = ', data);
 

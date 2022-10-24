@@ -52,7 +52,7 @@ export function renderSearchResultsBlock (data: IPlace[]) {
   let list = '';
   const favIds:string[] = getFavoritesList();
   data.forEach((item) => {
-    const isFavorite = favIds.find((favId) => { return favId === item.id;});
+    const isFavorite = favIds.find((favId) => { return favId === (item.id).toString();});
     const activeClass = isFavorite === undefined ? '' : 'active';
     const template =
     `<li class="result">
@@ -66,7 +66,7 @@ export function renderSearchResultsBlock (data: IPlace[]) {
           <p>${item.name}</p>
           <p class="price">${item.price}&#8381;</p>
         </div>
-        <div class="result-info--map"><i class="map-icon"></i> ${item.remoteness}км от вас</div>
+        <div class="result-info--map"><i class="map-icon"></i> ${item.remoteness} км от вас</div>
         <div class="result-info--descr">${item.description}</div>
         <div class="result-info--footer">
           <div>
