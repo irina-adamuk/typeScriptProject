@@ -182,5 +182,5 @@ export function renderSearchResultsBlock (data: IPlaceCommon[]) {
   })
 }
 
-
+// Добрый вечер в этой ветке Вы можете проверить задание №3 и № 4 
 
