@@ -152,6 +152,7 @@ export async function searchFromAPI( data: ISearchFormData):Promise<IPlaceCommon
       bookedDates: item.bookedDates,
       price: item.price,
       remoteness: item.remoteness,
+      source: 'API'
     }
   })
 
@@ -171,6 +172,7 @@ export async function searchFromSDK( data: ISearchFormData):Promise<IPlaceCommon
       bookedDates: item.bookedDates,
       price: item.totalPrice,
       remoteness: null,
+      source: 'SDK'
     }
   })
 

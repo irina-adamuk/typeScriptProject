@@ -1,3 +1,5 @@
+export type sourceAPI = 'API'
+export type sourceCommon = 'API' | 'SDK'
 export interface IUser {
   userName: string;
   avatarUrl: string;
@@ -21,6 +23,7 @@ export interface IPlaceAPI {
   bookedDates: [];
   price: number;
   remoteness: number;
+  source: sourceAPI
 }
 export interface IPlaceCommon {
   id: string;
@@ -30,4 +33,11 @@ export interface IPlaceCommon {
   bookedDates: [];
   price: number;
   remoteness: number | null;
+  source: sourceCommon
+}
+export interface IBookData {
+  id: string,
+  checkInDate: Date,
+  checkOutDate: Date,
+  source: 'API' | 'SDK'
 }

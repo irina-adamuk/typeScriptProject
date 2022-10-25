@@ -147,7 +147,7 @@ export class FlatRentSdk {
   /**
    * Book flat.
    *
-   * @param {number} flatId
+   * @param {string} flatId
    * @param {Date} checkInDate
    * @param {Date} checkOutDate
    * @returns {number}

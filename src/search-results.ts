@@ -1,6 +1,8 @@
 import { renderBlock } from './lib.js';
 import { APILocalStorage } from './APILocalStorage.js';
-import { IPlaceCommon } from './interfaces.js';
+import { IPlaceCommon, IBookData } from './interfaces.js';
+import { FlatRentSdk } from './flat-rent-sdk.js';
+import { renderToast, MessageType } from './lib.js';
 
 export function renderSearchStubBlock () {
   renderBlock(
@@ -38,6 +40,7 @@ export function toggleFavoritesItem(event) {
     event.target.classList.add('active');
   }
 }
+
 export function getFavoritesList():string[] {
   const list = APILocalStorage.get('favoriteItems');
   if (list) {
@@ -45,6 +48,77 @@ export function getFavoritesList():string[] {
   }
   return [];
 }
+
+export function getBookData(event) :IBookData {
+  const id: string = event.target.dataset.id;
+  const source: 'API' | 'SDK' = event.target.dataset.source;
+  const checkInInput = (document.querySelector('#check-in-date')) as HTMLInputElement;
+  const checkOutInput = (document.querySelector('#check-out-date')) as HTMLInputElement;
+
+  return {
+    id: id,
+    source: source,
+    checkInDate: new Date(checkInInput.value),
+    checkOutDate: new Date(checkOutInput.value)
+  }
+}
+
+export async function  bookSDK(bookData: IBookData) {
+  const rentSDK = new FlatRentSdk();
+  const bookAnswerSDK = await rentSDK.book(bookData.id, bookData.checkInDate, bookData.checkOutDate)
+  console.log('Booked SDK', bookAnswerSDK);
+  let message:MessageType;
+
+  if(bookAnswerSDK !== null) {
+    message  = {
+      text: `Бронирование прошло успешно! Номер бронирования ${bookAnswerSDK}`,
+      type: 'success'
+    }
+  }else {
+    message  = {
+      text: 'Что-то пошло не так!',
+      type: 'error'
+    }
+  }
+  renderToast(message, {name: 'OK', handler: null})
+}
+export function dateToUnixStamp(date) {
+  return date.getTime() / 1000
+}
+
+export async function  bookAPI(bookData: IBookData) {
+  const url = `http://localhost:3030/places/${bookData.id}?` +
+  `checkInDate=${dateToUnixStamp(bookData.checkInDate)}&` +
+  `checkOutDate=${dateToUnixStamp(bookData.checkOutDate)}&`
+  const bookAnswerAPI = await fetch(url, {method: 'PATCH'})
+  console.log('Booked API', bookAnswerAPI);
+
+  let message:MessageType;
+  if(bookAnswerAPI.status === 200) {
+    message  = {
+      text: 'Бронирование прошло успешно!',
+      type: 'success'
+    }
+  }else {
+    message  = {
+      text: 'Что-то пошло не так!',
+      type: 'error'
+    }
+  }
+  renderToast(message, {name: 'OK', handler: null})
+}
+
+export function bookBtnHandler(event): void {
+  const bookData = getBookData(event);
+
+  if(bookData.source === 'SDK') {
+    bookSDK(bookData);
+  } else {
+    bookAPI(bookData);
+  }
+}
+
+
 
 
 
@@ -71,7 +145,7 @@ export function renderSearchResultsBlock (data: IPlaceCommon[]) {
         <div class="result-info--descr">${item.description}</div>
         <div class="result-info--footer">
           <div>
-            <button>Забронировать</button>
+            <button class="js-book-btn" data-id="${item.id}" data-source="${item.source}">Забронировать</button>
           </div>
         </div>
       </div>
@@ -97,9 +171,13 @@ export function renderSearchResultsBlock (data: IPlaceCommon[]) {
   `;
 
   renderBlock('search-results-block', html);
-  const favoriteButton = document.querySelectorAll('.js-favoriteToggle');
+  const favoriteButtons = document.querySelectorAll('.js-favoriteToggle');
+  const bookBtns = document.querySelectorAll('.js-book-btn');
+  bookBtns.forEach((item) => {
+    item.addEventListener('click', bookBtnHandler);
+  })
 
-  favoriteButton.forEach((item) => {
+  favoriteButtons.forEach((item) => {
     item.addEventListener('click', toggleFavoritesItem);
   })
 }

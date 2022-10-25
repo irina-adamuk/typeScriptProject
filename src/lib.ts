@@ -2,11 +2,11 @@ export function renderBlock (elementId, html) {
   const element = document.getElementById(elementId)
   element.innerHTML = html;
 }
-type MessageType = {
+export type MessageType = {
   text: string;
   type: string;
 }
-type ActionType = {
+export type ActionType = {
   name: string;
   handler: () => void;
 }
