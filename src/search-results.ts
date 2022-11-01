@@ -17,28 +17,29 @@ export function renderSearchStubBlock () {
   )
 }
 
-export function renderEmptyOrErrorSearchBlock (reasonMessage) {
-  renderBlock(
-    'search-results-block',
-    `
-    <div class="no-results-block">
-      <img src="img/no-results.png" />
-      <p>${reasonMessage}</p>
-    </div>
-    `
-  )
-}
-export function toggleFavoritesItem(event) {
-  const id: string = event.target.dataset.id;
+// export function renderEmptyOrErrorSearchBlock (reasonMessage) {
+//   renderBlock(
+//     'search-results-block',
+//     `
+//     <div class="no-results-block">
+//       <img src="img/no-results.png" />
+//       <p>${reasonMessage}</p>
+//     </div>
+//     `
+//   )
+// }
+export function toggleFavoritesItem(event:Event) {
+  const target = event.target as HTMLElement
+  const id: string = target.dataset.id ?? '';
   const favoritesItem:string[] = getFavoritesList();
   const isFindItem = favoritesItem.find(itemId => itemId === id)
   if (isFindItem) {
     const newFavoritesItems = favoritesItem.filter(itemId => itemId !== id);
     APILocalStorage.set('favoriteItems', newFavoritesItems.join());
-    event.target.classList.remove('active');
+    target.classList.remove('active');
   } else {
     APILocalStorage.set('favoriteItems', [...favoritesItem, id].join());
-    event.target.classList.add('active');
+    target.classList.add('active');
   }
 }
 
@@ -50,9 +51,13 @@ export function getFavoritesList():string[] {
   return [];
 }
 
-export function getBookData(event) :IBookData {
-  const id: string = event.target.dataset.id;
-  const source: 'API' | 'SDK' = event.target.dataset.source;
+export function getBookData(event:Event) :IBookData {
+  const target = event.target as HTMLElement
+  if (!target) {
+    throw Error('Target not found')
+  }
+  const id = target.dataset.id ?? '';
+  const source = target.dataset.source === 'API' ? 'API' :'SDK';
   const checkInInput = (document.querySelector('#check-in-date')) as HTMLInputElement;
   const checkOutInput = (document.querySelector('#check-out-date')) as HTMLInputElement;
 
@@ -64,7 +69,7 @@ export function getBookData(event) :IBookData {
   }
 }
 
-export async function bookBtnHandler(event): Promise<void> {
+export async function bookBtnHandler(event:Event): Promise<void> {
   const bookData = getBookData(event);
   let bookNumber = null;
   try {
@@ -91,7 +96,7 @@ export async function bookBtnHandler(event): Promise<void> {
     text: text,
     type: 'success'
   }
-  renderToast(message, {name: 'OK', handler: null})
+  renderToast(message, {name: 'OK', handler: () => void {}})
 }
 
 const sort = {
@@ -103,7 +108,8 @@ const sort = {
 async function sortHandler() {
   const select = document.getElementById('select') as HTMLSelectElement;
   const sortBy = +select.options[select.selectedIndex].value;
-  const searchFormData: ISearchFormData = getSearchFormData();
+  const searchFormData = getSearchFormData();
+  if (!searchFormData)return;
   const data:IPlaceCommon[] = await getPlaces(searchFormData);
   renderSearchResultsBlock(data, sortBy)
 }
@@ -172,7 +178,7 @@ export function renderSearchResultsBlock (data: IPlaceCommon[], sortBy = sort.ch
     <ul class="results-list">${list}</ul>
   `;
 
- 
+
   renderBlock('search-results-block', html);
   const favoriteButtons = document.querySelectorAll('.js-favoriteToggle');
   const bookBtns = document.querySelectorAll('.js-book-btn');
@@ -185,6 +191,9 @@ export function renderSearchResultsBlock (data: IPlaceCommon[], sortBy = sort.ch
   })
 
   const select = document.getElementById('select');
+  if (!select) {
+    return;
+  }
   select.addEventListener('change', sortHandler);
 }
 

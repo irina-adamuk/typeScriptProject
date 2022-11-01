@@ -1,5 +1,8 @@
-export function renderBlock (elementId, html) {
+export function renderBlock(elementId:string, html:string) {
   const element = document.getElementById(elementId)
+  if (!element) {
+    return
+  }
   element.innerHTML = html;
 }
 export type MessageType = {
@@ -11,7 +14,7 @@ export type ActionType = {
   handler: () => void;
 }
 
-export function renderToast (message: MessageType, action: ActionType) {
+export function renderToast(message: MessageType|null, action: ActionType|null) {
   let messageText = ''
   
   if (message != null) {

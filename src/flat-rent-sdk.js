@@ -269,6 +269,7 @@ export class FlatRentSdk {
   }
 
   _readDatabase() {
+    // eslint-disable-next-line no-undef
     const data = window.localStorage.getItem(localStorageKey);
 
     if (data == null) {
@@ -279,6 +280,7 @@ export class FlatRentSdk {
   }
 
   _writeDatabase(database) {
+    // eslint-disable-next-line no-undef
     window.localStorage.setItem(localStorageKey, JSON.stringify(database));
   }
 
