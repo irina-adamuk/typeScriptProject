@@ -3,7 +3,7 @@ import { IBookData, IPlaceAPI, IPlaceCommon, IProvider, ISearchFormData } from '
 
 
 export class ProviderApi implements IProvider {
-  async book(bookData: IBookData): Promise<number> {
+  async book(bookData: IBookData): Promise<number|null> {
     const url = `http://localhost:3030/places/${bookData.id}?` +
       `checkInDate=${this._dateToUnixStamp(bookData.checkInDate)}&` +
       `checkOutDate=${this._dateToUnixStamp(bookData.checkOutDate)}&`
@@ -46,16 +46,16 @@ export class ProviderApi implements IProvider {
     return IPlaceCommonData;
   }
 
-  _dateToUnixStamp(date) {
+  _dateToUnixStamp(date:Date) {
     return date.getTime() / 1000
   }
 
-  _responseToJson(requestPromise) {
+  _responseToJson(requestPromise:Promise<Response>) {
     return requestPromise
-      .then((response) => {
+      .then((response:Response) => {
         return response.text()
       })
-      .then((response) => {
+      .then((response:string) => {
         return JSON.parse(response)
       })
   }

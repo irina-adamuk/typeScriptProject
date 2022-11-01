@@ -61,9 +61,16 @@ export function renderSearchFormBlock () {
 
   const searchForm = document.getElementById('search-form');
 
+  if (!searchForm) {
+    return;
+  }
+
   searchForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const searchFormData: ISearchFormData = getSearchFormData();
+    const searchFormData = getSearchFormData();
+    if (!searchFormData){
+      return;
+    }
     const answer:IPlaceCommon[] = await getPlaces(searchFormData);
     if (answer.length === 0) {
       const message = {
@@ -80,7 +87,7 @@ interface ISearchCallBack {
   (data: DataI): void
 }
 type DataI = {
-  data:IPlaceCommon[] | null,
+  data:IPlaceCommon[],
   error: Error | null
 }
 
@@ -94,6 +101,10 @@ const searchCallBack: ISearchCallBack = (data: DataI) => {
 }
 export function getSearchFormData() {
   const searchForm = document.getElementById('search-form');
+
+  if(!searchForm) {
+    return;
+  }
   const cityInput = searchForm.querySelector('#city') as HTMLInputElement;
   const checkInInput = searchForm.querySelector('#check-in-date') as HTMLInputElement;
   const checkOutInput = searchForm.querySelector('#check-out-date') as HTMLInputElement;
@@ -112,7 +123,7 @@ export function getSearchFormData() {
   return searchFormData;
 }
 
-export async function getPlaces(searchFormData) {
+export async function getPlaces(searchFormData:ISearchFormData) {
   let answer:IPlaceCommon[] = [];
   try {    
     if(searchFormData.isCheckedAPI) {
