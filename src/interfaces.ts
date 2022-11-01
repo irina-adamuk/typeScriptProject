@@ -1,5 +1,6 @@
 export type sourceAPI = 'API'
 export type sourceCommon = 'API' | 'SDK'
+export type sortBy = 0 | 1 | 2
 export interface IUser {
   userName: string;
   avatarUrl: string;
@@ -40,4 +41,9 @@ export interface IBookData {
   checkInDate: Date,
   checkOutDate: Date,
   source: 'API' | 'SDK'
+}
+
+export interface IProvider {
+  search(data: ISearchFormData):Promise<IPlaceCommon[]>
+  book(bookData: IBookData): Promise<number | null>
 }

@@ -1,8 +1,9 @@
 import { renderBlock } from './lib.js';
 import { APILocalStorage } from './APILocalStorage.js';
-import { IPlaceCommon, IBookData } from './interfaces.js';
-import { FlatRentSdk } from './flat-rent-sdk.js';
+import { IPlaceCommon, IBookData, ISearchFormData } from './interfaces.js';
 import { renderToast, MessageType } from './lib.js';
+import { ProviderApi, ProviderSDK } from './providers.js';
+import { getPlaces, getSearchFormData } from './search-form.js';
 
 export function renderSearchStubBlock () {
   renderBlock(
@@ -63,68 +64,70 @@ export function getBookData(event) :IBookData {
   }
 }
 
-export async function  bookSDK(bookData: IBookData) {
-  const rentSDK = new FlatRentSdk();
-  const bookAnswerSDK = await rentSDK.book(bookData.id, bookData.checkInDate, bookData.checkOutDate)
-  console.log('Booked SDK', bookAnswerSDK);
-  let message:MessageType;
-
-  if(bookAnswerSDK !== null) {
-    message  = {
-      text: `Бронирование прошло успешно! Номер бронирования ${bookAnswerSDK}`,
-      type: 'success'
-    }
-  }else {
-    message  = {
-      text: 'Что-то пошло не так!',
-      type: 'error'
-    }
-  }
-  renderToast(message, {name: 'OK', handler: null})
-}
-export function dateToUnixStamp(date) {
-  return date.getTime() / 1000
-}
-
-export async function  bookAPI(bookData: IBookData) {
-  const url = `http://localhost:3030/places/${bookData.id}?` +
-  `checkInDate=${dateToUnixStamp(bookData.checkInDate)}&` +
-  `checkOutDate=${dateToUnixStamp(bookData.checkOutDate)}&`
-  const bookAnswerAPI = await fetch(url, {method: 'PATCH'})
-  console.log('Booked API', bookAnswerAPI);
-
-  let message:MessageType;
-  if(bookAnswerAPI.status === 200) {
-    message  = {
-      text: 'Бронирование прошло успешно!',
-      type: 'success'
-    }
-  }else {
-    message  = {
-      text: 'Что-то пошло не так!',
-      type: 'error'
-    }
-  }
-  renderToast(message, {name: 'OK', handler: null})
-}
-
-export function bookBtnHandler(event): void {
+export async function bookBtnHandler(event): Promise<void> {
   const bookData = getBookData(event);
+  let bookNumber = null;
+  try {
+    if(bookData.source === 'SDK') {
+      const providerSDK = new ProviderSDK();
+      bookNumber = await providerSDK.book(bookData);
+    } else {
+      const providerAPI = new ProviderApi();
+      bookNumber = await providerAPI.book(bookData);
+    }
+  } catch(error) {
+    console.log( error)
+    const message:MessageType = {
+      text: error.message,
+      type: 'success'
+    }
+    renderToast(message
+      , null);
+    return;
+  }
 
-  if(bookData.source === 'SDK') {
-    bookSDK(bookData);
-  } else {
-    bookAPI(bookData);
+  const text = bookNumber === null ?  'Бронирование прошло успешно!' : 'Бронирование прошло успешно! Номер '  + bookNumber
+  const message:MessageType = {
+    text: text,
+    type: 'success'
+  }
+  renderToast(message, {name: 'OK', handler: null})
+}
+
+const sort = {
+  cheapFirst: 0,
+  expensiveFirst: 1,
+  // nearest: 2
+}
+
+async function sortHandler() {
+  const select = document.getElementById('select') as HTMLSelectElement;
+  const sortBy = +select.options[select.selectedIndex].value;
+  const searchFormData: ISearchFormData = getSearchFormData();
+  const data:IPlaceCommon[] = await getPlaces(searchFormData);
+  renderSearchResultsBlock(data, sortBy)
+}
+
+function sortData(data: IPlaceCommon[], sortBy:number) {
+
+  if(sortBy === 0) {
+    data.sort(function(a, b){
+      return a.price-b.price
+    })
+  } else if(sortBy === 1) {
+    data.sort(function(a, b){
+      return b.price-a.price
+    })
   }
 }
 
-
-
-
-
-export function renderSearchResultsBlock (data: IPlaceCommon[]) {
+export function renderSearchResultsBlock (data: IPlaceCommon[], sortBy = sort.cheapFirst) {
   let list = '';
   const favIds:string[] = getFavoritesList();
+
+  //сортировка 
+  sortData(data, sortBy);
+
   data.forEach((item) => {
     const isFavorite = favIds.find((favId) => { return favId === (item.id).toString();});
     const activeClass = isFavorite === undefined ? '' : 'active';
@@ -160,16 +163,16 @@ export function renderSearchResultsBlock (data: IPlaceCommon[]) {
       <p>Результаты поиска</p>
       <div class="search-results-filter">
         <span><i class="icon icon-filter"></i> Сортировать:</span>
-          <select>
-            <option selected="">Сначала дешёвые</option>
-            <option selected="">Сначала дорогие</option>
-            <option>Сначала ближе</option>
+          <select id="select">
+            <option value="0">Сначала дешёвые</option>
+            <option value="1">Сначала дорогие</option>
         </select>
       </div>
     </div>
     <ul class="results-list">${list}</ul>
   `;
 
+ 
   renderBlock('search-results-block', html);
   const favoriteButtons = document.querySelectorAll('.js-favoriteToggle');
   const bookBtns = document.querySelectorAll('.js-book-btn');
@@ -180,7 +183,10 @@ export function renderSearchResultsBlock (data: IPlaceCommon[]) {
   favoriteButtons.forEach((item) => {
     item.addEventListener('click', toggleFavoritesItem);
   })
+
+  const select = document.getElementById('select');
+  select.addEventListener('change', sortHandler);
 }
 
-// Добрый вечер в этой ветке Вы можете проверить задание №3 и № 4 
+
 
