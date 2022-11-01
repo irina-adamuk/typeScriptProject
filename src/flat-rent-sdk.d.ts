@@ -28,6 +28,5 @@ export class FlatRentSdk {
   get(id:string): Promise<IPlaceSDK | null>
 
   search(parameters:ISearchParams):IPlaceSDK[]
-
   book(flatId:string, checkInDate:Date, checkOutDate:Date) : number
 }
